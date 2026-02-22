@@ -7,10 +7,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -21,13 +18,18 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/signup")
-    public ResponseEntity<ApiResponse> signup(@Valid @RequestBody SignupRequest signupRequest){
-        return ResponseEntity.ok().body(authService.signup(signupRequest));
+    public ResponseEntity<ApiResponse> signup(@RequestBody SignupRequest signupRequest, @RequestParam String otp){
+        return ResponseEntity.ok(authService.signup(signupRequest, otp));
     }
 
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest loginRequest){
         return ResponseEntity.ok().body(authService.login(loginRequest));
+    }
+
+    @PostMapping("/forgotpassword")
+    public ResponseEntity<ApiResponse> forgotPassword(ForgotPasswordRequest forgotPasswordRequest){
+        return ResponseEntity.ok(authService.requestForForgotPassword(forgotPasswordRequest));
     }
 
     @PostMapping("/refresh")
