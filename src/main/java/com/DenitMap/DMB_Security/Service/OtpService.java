@@ -21,10 +21,10 @@ public class OtpService {
 
     private final EmailService emailService;
 
-    private static final long OTP_EXPIRATION_MS = 5*60*1000;
+    private static final long OTP_EXPIRATION_MS = 5 * 60 * 1000;
 
-    public void generateOtpAndSend(String mail, Purpose purpose){
-        String otp = String.format("%06d",new Random().nextInt(999999));
+    public void generateOtpAndSend(String mail, Purpose purpose) {
+        String otp = String.format("%06d", new Random().nextInt(999999));
         otpRepository.deleteByEmailAndPurpose(mail, purpose);
 
         OTPToken otpToken = OTPToken.builder().email(mail).otp(passwordEncoder.encode(otp)).purpose(purpose)
@@ -32,23 +32,20 @@ public class OtpService {
 
         otpRepository.save(otpToken);
 
-        emailService.sendMail(mail,otp);
+        emailService.sendMail(mail, "Your OTP Code for " + purpose.name(),
+                "Your OTP is " + otp + ". This will expire in 5 minutes.");
     }
 
-    public boolean validateSentOtp(String email, String otp, Purpose purpose){
+    public boolean validateSentOtp(String email, String otp, Purpose purpose) {
 
         OTPToken otpToken = otpRepository.findByEmailAndPurpose(email, purpose)
-                .orElseThrow(()-> new BadRequestException("Something went Wrong Please try again later"));
-        if (otpToken.getExpiresAt().isBefore(Instant.now())){
+                .orElseThrow(() -> new BadRequestException("Something went Wrong Please try again later"));
+        if (otpToken.getExpiresAt().isBefore(Instant.now())) {
             throw new BadRequestException("Invalid OTP, OTP already Expired");
         }
 
-        if (!passwordEncoder.matches(otp, otpToken.getOtp())){
+        if (!passwordEncoder.matches(otp, otpToken.getOtp())) {
             throw new BadRequestException("OTP Doesn't Match");
-        }
-
-        if(!passwordEncoder.matches(otp, otpToken.getOtp())){
-            return false;
         }
 
         otpRepository.delete(otpToken);
