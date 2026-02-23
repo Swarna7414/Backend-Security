@@ -1,6 +1,7 @@
 package com.DenitMap.DMB_Security.Service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
@@ -10,13 +11,16 @@ import org.springframework.stereotype.Service;
 public class EmailService {
     private final JavaMailSender javaMailSender;
 
-    public void sendMail(String toMail, String otp){
+    @Value("${spring.mail.username}")
+    private String from;
 
+    public void sendMail(String toMail, String subject, String body) {
         SimpleMailMessage simpleMailMessage = new SimpleMailMessage();
 
+        simpleMailMessage.setFrom(from);
         simpleMailMessage.setTo(toMail);
-        simpleMailMessage.setSubject("Your Otp Code for Signup");
-        simpleMailMessage.setText("your OTP is "+otp+" this will expire in 5 minutes");
+        simpleMailMessage.setSubject(subject);
+        simpleMailMessage.setText(body);
 
         javaMailSender.send(simpleMailMessage);
     }
