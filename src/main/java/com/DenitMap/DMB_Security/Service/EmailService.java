@@ -9,19 +9,21 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class EmailService {
+
     private final JavaMailSender javaMailSender;
 
     @Value("${spring.mail.username}")
     private String from;
 
-    public void sendMail(String toMail, String subject, String body) {
+    public void sendMail(String to, String subject, String body){
         SimpleMailMessage simpleMailMessage = new SimpleMailMessage();
 
         simpleMailMessage.setFrom(from);
-        simpleMailMessage.setTo(toMail);
+        simpleMailMessage.setTo(to);
         simpleMailMessage.setSubject(subject);
         simpleMailMessage.setText(body);
 
         javaMailSender.send(simpleMailMessage);
+
     }
 }

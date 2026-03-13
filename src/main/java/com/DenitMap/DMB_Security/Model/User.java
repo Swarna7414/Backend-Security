@@ -6,13 +6,14 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.Instant;
 import java.time.LocalDate;
 
 @Entity
 @Table(name = "users")
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 @Builder
 public class User {
 
@@ -36,7 +37,5 @@ public class User {
     private String email;
 
     @Column(nullable = false)
-    private String passwordHash;
-
-
+    private Instant createdAt;
 }

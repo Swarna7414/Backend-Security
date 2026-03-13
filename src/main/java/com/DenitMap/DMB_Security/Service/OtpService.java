@@ -1,16 +1,18 @@
 package com.DenitMap.DMB_Security.Service;
 
 import com.DenitMap.DMB_Security.Exceptions.BadRequestException;
-import com.DenitMap.DMB_Security.Model.OTPToken;
-import com.DenitMap.DMB_Security.Model.Purpose;
+import com.DenitMap.DMB_Security.Model.OtpPurpose;
+import com.DenitMap.DMB_Security.Model.OtpToken;
 import com.DenitMap.DMB_Security.Repository.OtpRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.Random;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class OtpService {
@@ -21,36 +23,47 @@ public class OtpService {
 
     private final EmailService emailService;
 
-    private static final long OTP_EXPIRATION_MS = 5 * 60 * 1000;
+    private static final long OTP_EXP_MS = 5*60*1000;
 
-    public void generateOtpAndSend(String mail, Purpose purpose) {
-        String otp = String.format("%06d", new Random().nextInt(999999));
-        otpRepository.deleteByEmailAndPurpose(mail, purpose);
+    public void generateOtpAndSend(String email, OtpPurpose otpPurpose){
+        String otp = String.format("%06d", new Random().nextInt(1_000_000));
 
-        OTPToken otpToken = OTPToken.builder().email(mail).otp(passwordEncoder.encode(otp)).purpose(purpose)
-                .expiresAt(Instant.now().plusMillis(OTP_EXPIRATION_MS)).build();
+        log.info("OTP Generated {}",otp);
+        otpRepository.deleteByEmailAndPurpose(email, otpPurpose);
+
+        log.info("Deleted the OTP in the Otp repository {}", email);
+        OtpToken otpToken = OtpToken.builder().email(email).otpPurpose(otpPurpose).otpHash(passwordEncoder.encode(otp))
+                .expiresAt(Instant.now().plusMillis(OTP_EXP_MS)).build();
 
         otpRepository.save(otpToken);
 
-        emailService.sendMail(mail, "Your OTP Code for " + purpose.name(),
-                "Your OTP is " + otp + ". This will expire in 5 minutes.");
+        log.info("saved the New OTP token to the Repository");
+
+        String body = "Hey this your OTP"+otp+"for"+otpPurpose.name()+"& this will expire in 5 minutes";
+
+        emailService.sendMail(email, "Your OTP Code for"+otpPurpose.name(), body);
+
+        log.info("Mail sent to the {}", email);
     }
 
-    public boolean validateSentOtp(String email, String otp, Purpose purpose) {
+    public void validateOrThrow(String email, String otp, OtpPurpose otpPurpose){
+        OtpToken otpToken = otpRepository.findByEmailAndPurpose(email, otpPurpose)
+                .orElseThrow(()->new BadRequestException("Otp not found in the DataBase, Please Request again"));
 
-        OTPToken otpToken = otpRepository.findByEmailAndPurpose(email, purpose)
-                .orElseThrow(() -> new BadRequestException("Something went Wrong Please try again later"));
-        if (otpToken.getExpiresAt().isBefore(Instant.now())) {
-            throw new BadRequestException("Invalid OTP, OTP already Expired");
+        log.info("Got the OtpToken from the Repository {} ", otpToken);
+        if (otpToken.getExpiresAt().isBefore(Instant.now())){
+            log.error("OPT was expired");
+            throw new BadRequestException("OTP Expired please try again");
         }
 
-        if (!passwordEncoder.matches(otp, otpToken.getOtp())) {
-            throw new BadRequestException("OTP Doesn't Match");
+        if (!passwordEncoder.matches(otpToken.getOtpHash(), otp)){
+            log.error("Password wasn't Matching");
+            throw new BadRequestException("OTP isn't matching");
         }
 
         otpRepository.delete(otpToken);
-
-        return true;
-
+        log.info("OTP was successfully Deleted");
     }
+
+
 }

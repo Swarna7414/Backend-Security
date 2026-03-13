@@ -15,7 +15,6 @@ import java.util.Base64;
 @Component
 public class KeyUtils {
 
-
     @Value("classpath:Keys/private.pem")
     private Resource privateKey;
 
@@ -53,7 +52,7 @@ public class KeyUtils {
             X509EncodedKeySpec spec = new X509EncodedKeySpec(decoded);
             return KeyFactory.getInstance("RSA").generatePublic(spec);
         } catch (Exception e) {
-            throw new RuntimeException("Couldn't able to Load the Public key",e);
+            throw new RuntimeException("Failed to load pubic key",e);
         }
     }
 }

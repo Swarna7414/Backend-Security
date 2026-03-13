@@ -1,11 +1,11 @@
 package com.DenitMap.DMB_Security.Controller;
 
+
 import com.DenitMap.DMB_Security.DTO.*;
 import com.DenitMap.DMB_Security.Service.AuthService;
 import com.DenitMap.DMB_Security.Service.OtpService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,41 +14,38 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/auth")
 public class AuthController {
 
-    @Autowired
     private final AuthService authService;
 
-    @Autowired
     private final OtpService otpService;
 
     @PostMapping("/send-otp")
-    public ResponseEntity<ApiResponse> sendOtp(@Valid @RequestBody SendOtpRequest sendOtpRequest) {
-        otpService.generateOtpAndSend(sendOtpRequest.getEmail(), sendOtpRequest.getPurpose());
-        return ResponseEntity.ok(new ApiResponse("OTP sent successfully"));
+    public ResponseEntity<APIResponse> sendOtp(@Valid @RequestBody SendOtpRequest sendOtpRequest){
+        otpService.generateOtpAndSend(sendOtpRequest.getEmail(), sendOtpRequest.getOtpPurpose());
+        return ResponseEntity.ok().body(new APIResponse("OTP sent Successfully please Signup using OTP"));
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<ApiResponse> signup(@Valid @RequestBody SignupRequest signupRequest,
-                                              @RequestParam String otp) {
-        return ResponseEntity.ok(authService.signup(signupRequest, otp));
+    public ResponseEntity<APIResponse> signUp(@RequestBody SignupRequest signupRequest, @RequestParam String otp){
+        return ResponseEntity.ok().body(authService.signUpLocal(signupRequest, otp));
     }
 
     @PostMapping("/login")
-    public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest loginRequest) {
-        return ResponseEntity.ok().body(authService.login(loginRequest));
+    public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest loginRequest){
+        return ResponseEntity.ok().body(authService.loginLocal(loginRequest));
     }
 
-    @PostMapping("/forgotpassword")
-    public ResponseEntity<ApiResponse> forgotPassword(@Valid @RequestBody ForgotPasswordRequest forgotPasswordRequest) {
-        return ResponseEntity.ok(authService.requestForForgotPassword(forgotPasswordRequest));
+    @PostMapping("forgot-password")
+    public ResponseEntity<APIResponse> forgotPassword(@RequestBody ForgotPasswordRequest forgotPasswordRequest){
+        return ResponseEntity.ok(authService.forgotPasswordLocal(forgotPasswordRequest));
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<AuthResponse> refreshRequest(@Valid @RequestBody RefreshRequest refreshRequest) {
-        return ResponseEntity.ok().body(authService.refresh(refreshRequest));
+    public ResponseEntity<AuthResponse> refresh(@RequestBody RefreshRequest refreshRequest){
+        return ResponseEntity.ok(authService.refreshRequest(refreshRequest));
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<ApiResponse> logout(@Valid @RequestBody RefreshRequest refreshRequest) {
+    public ResponseEntity<APIResponse> logout(@RequestBody RefreshRequest refreshRequest){
         return ResponseEntity.ok().body(authService.logout(refreshRequest));
     }
 

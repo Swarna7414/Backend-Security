@@ -1,5 +1,6 @@
 package com.DenitMap.DMB_Security.Model;
 
+
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,7 +15,7 @@ import java.time.Instant;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class OTPToken {
+public class OtpToken {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -24,13 +25,14 @@ public class OTPToken {
     private String email;
 
     @Column(nullable = false)
-    private String otp;
+    private String otpHash;
 
     @Column(nullable = false)
     private Instant expiresAt;
 
-    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    private Purpose purpose;
+    @Column(nullable = false)
+    private OtpPurpose otpPurpose;
+
 
 }

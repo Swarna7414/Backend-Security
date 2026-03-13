@@ -1,29 +1,46 @@
 spring:
   application:
     name: auth-server
-  mail:
-    host: smtp.gmail.com
-    port: 587
-    username: UserName
-    password: Password
-  smtp:
-    auth: true
-  starttls:
-    enable: true
 
   datasource:
     url: jdbc:h2:mem:authdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
     driverClassName: org.h2.Driver
     username: sa
     password:
+
   jpa:
     hibernate:
       ddl-auto: update
     show-sql: true
+
   h2:
     console:
       enabled: true
       path: /h2-console
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: saipree582@gmail.com
+    password: dwbb friw qtmm zjcc
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: YOUR_GOOGLE_CLIENT_ID
+            client-secret: YOUR_GOOGLE_CLIENT_SECRET
+            scope:
+              - email
+              - profile
+
 jwt:
   access-expiration-ms: 900000
   refresh-expiration-ms: 604800000
